@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<meta content="utf-8" http-equiv="encoding">
+	<title>repl.it</title>
+	<!-- <link href="style.css" rel="stylesheet" type="text/css" /> -->
+</head>
+
+<body>
+  <style>
+    #score1{
+  color: white;
+  position: absolute;
+  top:2%;
+  left: 2%
+}
+ #score2{
+  color: white;
+  position: absolute;
+  top:2%;
+  left: 50%
+}
+    </style>
+    <h2 id='score1'>Score</h2>
+     <h2 id='score2'>Score</h2>
+	<canvas id="gameCanvas" width="800" height="600">
+
+
+  </canvas>
+
+
+	<script>
+		var ballX = 75, ballY = 75
+var canvas, canvasContext;
+var ballSpeedX = 20
+var ballSpeedY = 16
+var roundwin
+var won = false;
+var compPadS = 15;
+var lost = false
+var isSittable = false
+const PADDLE_HEIGHT = 100
+var paddle1Y = 250;
+var paddle2Y= 250
+var paddleWidth = 10;
+var score = 0
+var scoretwo = 0
+var BPL = paddle1Y - ballY
+var score1 = document.getElementById('score1')
+var score2 = document.getElementById('score2')
+
+function calculateMousePos(evt) {
+   var rect = canvas.getBoundingClientRect(), root = document.documentElement;
+    
+    var mouseX = evt.clentX - rect.left - root.scrollLeft;
+    var mouseY = evt.clientY - rect.top - root.scrollTop;
+return {
+  x: mouseX,
+  y: mouseY
+   }
+ }
+
+
+
+window.onload = function() {
+  canvas = document.getElementById('gameCanvas')
+  canvasContext = canvas.getContext('2d')
+
+canvas.addEventListener('mousemove', function(evt){
+  var mousePos = calculateMousePos(evt);
+  paddle1Y = mousePos.y - (PADDLE_HEIGHT/2)
+
+  window.addEventListener('keypress', function(evt){
+   if(won == true || lost == true && evt.keyCode == 114){
+     location.href = 'https://pong--davidoganyan.repl.co/'
+   }
+  });
+  
+  })
+}
+
+var framesPerSecond = 30;
+  setInterval(function(){
+    drawEverything()
+    moveEverything()
+    console.log(ballX, ballY)
+},1000/framesPerSecond)
+
+function moveEverything(){
+  moveComputerPaddle()
+
+
+  if(ballY > canvas.height)
+  {
+    ballSpeedY *= -1
+ 
+  }
+    if(ballY < 0)
+  {
+    ballSpeedY *= -1
+    
+    
+  }
+
+if(ballX > canvas.width){
+ if(ballY > paddle2Y && ballY < paddle2Y+PADDLE_HEIGHT) {
+      console.log('k')
+      BPL = paddle2Y - ballY
+ballSpeedX *= -1; 
+    ballSpeedY = (BPL + 50) / -2.5
+}
+}
+if(ballX < 0 + paddleWidth){
+  if(ballY > paddle1Y && ballY < paddle1Y+PADDLE_HEIGHT) {
+      console.log('k')
+      BPL = paddle1Y - ballY
+ballSpeedX *= -1; 
+    ballSpeedY = (BPL + 50) / -2.5
+}
+else{
+  console.log(ballY)
+  console.log("PADDLE" + paddle1Y)
+  console.log("PADDLE AGAIN" + paddle1Y + PADDLE_HEIGHT)
+
+    scoretwo++
+    roundwin = false
+    if(scoretwo >= 10)
+    { 
+     
+    
+         
+         ballSpeedX= 0
+    ballSpeedY = 0
+      lost = true
+         
+    ballSpeedX= 0
+    ballSpeedY = 0
+    }
+  score2.innerHTML = `Score: ${scoretwo}`
+  ballReset()
+
+}
+}
+  else if(ballX > canvas.width - paddleWidth){
+    
+ if(ballY > paddle2Y && ballY < paddle2Y+PADDLE_HEIGHT) {
+
+ballSpeedX *= -1;
+
+}else {
+  score++
+  roundwin = true
+  if(score >= 10){
+
+
+    
+    ballSpeedX= 0
+    ballSpeedY = 0
+    won = true
+     
+  }
+  score1.innerHTML = `Score: ${score}`
+ballReset();
+
+  }
+   } 
+
+  ballY += ballSpeedY
+  ballX += ballSpeedX
+ 
+}
+
+function colorRect(topLeftX, topLeftY, boxWidth, boxHeight, fillColor){
+canvasContext.fillStyle = fillColor
+canvasContext.beginPath();
+canvasContext.fillRect(topLeftX, topLeftY, boxWidth, boxHeight)
+ canvasContext.fill()  
+}
+function colorCircle(centerX, centerY, radius, fillColor){
+canvasContext.fillStyle = fillColor
+canvasContext.beginPath();
+canvasContext.arc(centerX, centerY, radius,0, Math.PI*2)
+ canvasContext.fill()  
+ }
+
+function moveComputerPaddle(){
+   
+if(ballY <= paddle2Y + 50 + 35 && ballY >= paddle2Y + 50 - 35){
+  isSittable = true
+}
+else{
+  isSittable = false
+}
+
+  if(ballY < paddle2Y + 50 && isSittable == false){
+   paddle2Y -= compPadS
+  }else if(ballY > paddle2Y + 50 && isSittable == false)
+  {
+    paddle2Y += compPadS
+  }
+  else {
+isSittable = true
+  }
+
+
+ } 
+
+
+
+
+
+
+ function ballReset() {
+   if(roundwin == true){
+ballX = canvas.width / 2;
+ballY =  canvas.height / 2;
+
+paddle2Y = canvas.height / 2;
+}
+else{
+  ballX = canvas.width / 2;
+ballY = canvas.height / 2;
+paddle2Y = canvas.height / 2;
+
+}
+
+ballSpeedX = 18
+ballSpeedY = 16
+}
+
+function drawEverything() {
+  if(won == false && lost == false){
+  colorRect(0, 0, canvas.width, canvas.height, 'black')
+   
+ 
+colorRect(0, paddle1Y, paddleWidth, 100, 'blue')
+
+colorRect(790, paddle2Y, paddleWidth, 100, 'red')
+  
+
+canvasContext.strokeStyle = 'white'  
+    canvasContext.beginPath();
+     
+     canvasContext.setLineDash([10, 20]);
+ canvasContext.moveTo(400, 590);
+ canvasContext.lineTo(400, -10);
+ canvasContext.stroke();
+ 
+// canvasContext.fillStyle = 'red'
+//   canvasContext.beginPath();
+//   canvasContext.fillRect(0, 250, 10, 100)
+//   canvasContext.fill()  
+
+colorCircle(ballX, ballY, 10, 'blue')
+}else if(won == false && lost == true){
+   canvasContext.fillStyle = 'blue'
+      canvasContext.fillRect(0, 0, canvas.width, canvas.height)
+      canvasContext.font = "30px Comic Sans MS";
+canvasContext.fillStyle = "red";
+canvasContext.textAlign = "center";
+canvasContext.fillText("You Lost", canvas.width/2, 
+canvas.height/2);
+canvasContext.fillStyle = 'white'
+canvasContext.textAlign = 'center'
+canvasContext.fillText("Press 'r' to restart", canvas.width/2, canvas.height/2 + 100)
+ ballSpeedX= 0
+    ballSpeedY = 0
+}
+else if(won == true){
+  
+ canvasContext.fillStyle = 'blue'
+      canvasContext.fillRect(0, 0, canvas.width, canvas.height)
+      canvasContext.font = "30px Comic Sans MS";
+canvasContext.fillStyle = "red";
+canvasContext.textAlign = "center";
+canvasContext.fillText("You Won", canvas.width/2, canvas.height/2);
+canvasContext.fillStyle = 'white'
+canvasContext.textAlign = 'center'
+canvasContext.fillText("Press 'r' to restart", canvas.width/2, canvas.height/2 + 100)
+ ballSpeedX= 0
+    ballSpeedY = 0
+}
+}
+	</script>
+</body>
+
+</html>
